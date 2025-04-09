@@ -29,7 +29,7 @@
       border-radius: 20px;
       box-shadow: 0 15px 35px rgba(0,0,0,1.2);
       padding: 35px 25px;
-      max-width: 150px;
+      max-width: 400px;
       width: 100%;
       text-align: center;
       border: 1px solid rgba(255, 255, 255, 0.15);
@@ -92,14 +92,20 @@
       transform: translateY(0);
     }
 
-    #weatherResult .row .col {
-      font-size: 0.85rem;
-      color: white;
-    }
-
     .forecast-block {
       background-color: rgba(255, 255, 255, 0.07);
       border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .forecast-block img {
+      width: 40px;
+    }
+
+    .forecast-container {
+      margin-top: 40px;
     }
   </style>
 </head>
@@ -114,8 +120,12 @@
     </div>
 
     <div id="weatherResult">
-      <!-- Weather + forecast info will be displayed here -->
+      <!-- Current weather info will be displayed here -->
     </div>
+  </div>
+
+  <div class="forecast-container" id="forecastResult">
+    <!-- 24-Hour Weather Forecast info will be displayed here -->
   </div>
 
   <script>
@@ -124,17 +134,23 @@
       const apiKey = "d1bdee0b61522137d1b0a0d41dcf21ad";
       const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
 
+      // Fetch current weather data
       const res = await fetch(url);
       const data = await res.json();
-      const result = document.getElementById("weatherResult");
+      const currentWeatherResult = document.getElementById("weatherResult");
+      const forecastResult = document.getElementById("forecastResult");
 
       if (data.cod === 200) {
+        // Extract data
         const condition = data.weather[0].main.toLowerCase();
         const temp = data.main.temp;
         const icon = data.weather[0].icon;
+        const humidity = data.main.humidity;
+        const windSpeed = data.wind.speed;
         let mood = '';
         let backgroundImage = '';
 
+        // Define mood and background image based on weather condition
         if (condition.includes("rain")) {
           mood = `<p style="color:blue">"🌧 Don’t forget your umbrella!"</p>`;
           backgroundImage = "url('rain.jpg')";
@@ -151,30 +167,35 @@
           mood = `<p style="color:yellow">"🌈 Enjoy the weather!"</p>`;
         }
 
+        // Set background image
         document.body.style.backgroundImage = backgroundImage;
         document.body.style.backgroundSize = "cover";
         document.body.style.backgroundPosition = "center";
         document.body.style.transition = "background-image 0.8s ease-in-out";
 
+        // Prepare HTML for current weather
         let currentHTML = `
           <img src="https://openweathermap.org/img/wn/${icon}@2x.png" class="weather-icon" alt="Weather icon">
           <h4>${data.name}, ${data.sys.country}</h4>
           <div class="weather-info">
             <p>🌡 Temp: <strong>${temp}°C</strong></p>
             <p>🌥 Condition: ${data.weather[0].main} (${data.weather[0].description})</p>
-            <p>💧 Humidity: ${data.main.humidity}%</p>
-            <p>🌬 Wind: ${data.wind.speed} m/s</p>
+            <p>💧 Humidity: ${humidity}%</p>
+            <p>🌬 Wind: ${windSpeed} m/s</p>
           </div>
           <p class="mt-3 text-light"><em>${mood}</em></p>
         `;
 
-        // ⏳ Fetch forecast data
+        currentWeatherResult.innerHTML = currentHTML;
+
+        // Fetch 24-hour weather forecast data
         const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`;
         const forecastRes = await fetch(forecastUrl);
         const forecastData = await forecastRes.json();
 
-        let forecastHTML = `<div class="mt-4"><h5 class="text-light">🕗 Next 24 Hours Forecast:</h5><div class="row row-cols-2 row-cols-md-4 g-2 mt-2">`;
+        let forecastHTML = `<div class="row row-cols-2 row-cols-md-4 g-2 mt-2" style="background-color: rgba(255, 255, 255, 0.2); padding:20px; radius:20px;">`;
 
+        // Loop through the next 8 intervals (every 3 hours)
         for (let i = 0; i < 8; i++) {
           const forecast = forecastData.list[i];
           const time = new Date(forecast.dt * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -182,25 +203,26 @@
           const icon = forecast.weather[0].icon;
 
           forecastHTML += `
-            <div class="col text-center">
-              <div class="p-2 forecast-block">
-                <p class="mb-1"><strong>${time}</strong></p>
+            <div class="col" style="">
+              <div class="p-2 forecast-block" style="background-color:black;">
+                <p><strong>${time}</strong></p>
                 <img src="https://openweathermap.org/img/wn/${icon}.png" alt="icon">
-                <p class="mb-0">${temp}°C</p>
+                <p>${temp}°C</p>
               </div>
             </div>
           `;
         }
 
-        forecastHTML += `</div></div>`;
-        result.innerHTML = currentHTML + forecastHTML;
+        forecastHTML += `</div>`;
+        forecastResult.innerHTML = forecastHTML;
 
+        // Add 'active' class to trigger the animation for the result
         setTimeout(() => {
-          result.classList.add("active");
+          currentWeatherResult.classList.add("active");
         }, 100);
+
       } else {
-        result.innerHTML = `<p class="text-warning">⚠ City not found. Please try another.</p>`;
-        result.classList.add("active");
+        currentWeatherResult.innerHTML = `<p class="text-warning">⚠ City not found. Please try another.</p>`;
       }
     }
   </script>
