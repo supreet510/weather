@@ -21,6 +21,7 @@
       justify-content: center;
       flex-direction: column;
       overflow-y: auto;
+      width: 100%;
     }
 
     .weather-card {
@@ -29,8 +30,9 @@
       border-radius: 20px;
       box-shadow: 0 15px 35px rgba(0,0,0,1.2);
       padding: 35px 25px;
-      max-width: 400px;
+      max-width: 600px;
       width: 100%;
+      min-width: 300px;
       text-align: center;
       border: 1px solid rgba(255, 255, 255, 0.15);
       animation: fadeIn 1s ease;
@@ -111,16 +113,21 @@
 </head>
 
 <body>
-  <div class="weather-card" style="background-color: black;">
-    <h2 style="font-family:serif;">🌤 Weather Check</h2>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="weather-card">
+          <h2>🌤 Weather Check</h2>
+          <div class="input-group mb-4">
+            <input type="text" class="form-control" id="cityInput" placeholder="Enter city...">
+            <button onclick="getWeather()">Search</button>
+          </div>
 
-    <div class="input-group mb-4">
-      <input type="text" class="form-control" id="cityInput" placeholder="Enter city...">
-      <button onclick="getWeather()">Search</button>
-    </div>
-
-    <div id="weatherResult">
-      <!-- Current weather info will be displayed here -->
+          <div id="weatherResult">
+            <!-- Current weather info will be displayed here -->
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -203,7 +210,7 @@
           const icon = forecast.weather[0].icon;
 
           forecastHTML += `
-            <div class="col" style="">
+            <div class="col">
               <div class="p-2 forecast-block" style="background-color:black;">
                 <p><strong>${time}</strong></p>
                 <img src="https://openweathermap.org/img/wn/${icon}.png" alt="icon">
